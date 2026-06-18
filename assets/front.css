@@ -1,0 +1,223 @@
+/* Comms.Church PCO — front-end styles
+   Uses CSS custom properties so themes can override easily.
+   --ccpco-brand is set per-block via inline style; falls back to global option. */
+
+:root {
+  --ccpco-brand:     #1a4a8a;
+  --ccpco-radius:    8px;
+  --ccpco-gap:       1.5rem;
+  --ccpco-card-bg:   #ffffff;
+  --ccpco-shadow:    0 2px 12px rgba(0,0,0,.07);
+  --ccpco-text:      #1e293b;
+  --ccpco-muted:     #64748b;
+  --ccpco-border:    #e2e8f0;
+  --ccpco-font-sm:   .875rem;
+  --ccpco-font-xs:   .8rem;
+}
+
+/* ---- Grid ---------------------------------------------------------------- */
+.ccpco-signup-list {
+  display: grid;
+  gap: var(--ccpco-gap);
+}
+.ccpco-display-tiles.ccpco-cols-1 { grid-template-columns: 1fr; }
+.ccpco-display-tiles.ccpco-cols-2 { grid-template-columns: repeat(2,1fr); }
+.ccpco-display-tiles.ccpco-cols-3 { grid-template-columns: repeat(3,1fr); }
+.ccpco-display-tiles.ccpco-cols-4 { grid-template-columns: repeat(4,1fr); }
+
+.ccpco-display-list { grid-template-columns: 1fr; }
+.ccpco-display-list .ccpco-card { flex-direction: row; }
+.ccpco-display-list .ccpco-card-image { flex: 0 0 220px; }
+
+@media (max-width: 960px) {
+  .ccpco-display-tiles.ccpco-cols-3,
+  .ccpco-display-tiles.ccpco-cols-4 { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 600px) {
+  .ccpco-display-tiles,
+  .ccpco-display-list .ccpco-card { grid-template-columns: 1fr; flex-direction: column; }
+  .ccpco-display-list .ccpco-card-image { flex: none; }
+}
+
+/* ---- Card ---------------------------------------------------------------- */
+.ccpco-card {
+  background: var(--ccpco-card-bg);
+  border-radius: var(--ccpco-radius);
+  box-shadow: var(--ccpco-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.ccpco-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.11);
+}
+.ccpco-closed { opacity: .72; }
+
+/* ---- Image --------------------------------------------------------------- */
+.ccpco-card-image { position: relative; overflow: hidden; background: #f1f5f9; }
+.ccpco-shape-cinematic { padding-top: 56.25%; }
+.ccpco-shape-square    { padding-top: 100%; }
+.ccpco-shape-portrait  { padding-top: 133%; }
+
+.ccpco-card-image img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+}
+.ccpco-image-placeholder {
+  position: absolute; inset: 0;
+  background: var(--ccpco-brand);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 600; font-size: 1rem; padding: 1rem; text-align: center;
+}
+.ccpco-closed-badge {
+  position: absolute; top: .6rem; right: .6rem;
+  background: rgba(0,0,0,.55); color: #fff;
+  font-size: .7rem; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; padding: .2rem .55rem;
+  border-radius: 99px;
+}
+
+/* ---- Card body ----------------------------------------------------------- */
+.ccpco-card-body {
+  padding: 1.25rem;
+  display: flex; flex-direction: column; gap: .5rem; flex: 1;
+}
+.ccpco-card-title {
+  font-size: 1.05rem; font-weight: 700;
+  color: var(--ccpco-text); margin: 0 0 .25rem; line-height: 1.3;
+}
+.ccpco-card-meta { display: flex; flex-direction: column; gap: .3rem; }
+
+.ccpco-meta-date,
+.ccpco-meta-location,
+.ccpco-meta-price {
+  display: flex; align-items: flex-start; gap: .35rem;
+  font-size: var(--ccpco-font-sm); color: var(--ccpco-muted); margin: 0;
+}
+.ccpco-meta-date svg,
+.ccpco-meta-location svg {
+  width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px;
+  color: var(--ccpco-brand);
+}
+.ccpco-card-desc {
+  font-size: var(--ccpco-font-sm); color: var(--ccpco-muted);
+  margin: 0; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+}
+.ccpco-price      { font-weight: 600; color: var(--ccpco-brand); }
+.ccpco-price-free { font-weight: 600; color: #16a34a; }
+
+.ccpco-card-actions {
+  margin-top: auto; padding-top: .75rem;
+  display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
+}
+
+/* ---- Progress bar -------------------------------------------------------- */
+.ccpco-progress { margin: .25rem 0; }
+.ccpco-progress-bar {
+  height: 6px; background: var(--ccpco-border);
+  border-radius: 3px; overflow: hidden;
+}
+.ccpco-progress-fill {
+  height: 100%; background: var(--ccpco-brand);
+  border-radius: 3px; transition: width .4s ease;
+}
+.ccpco-progress-fill.ccpco-full { background: #dc2626; }
+.ccpco-progress-label { font-size: var(--ccpco-font-xs); color: var(--ccpco-muted); margin: 3px 0 0; }
+
+/* ---- Buttons ------------------------------------------------------------- */
+.ccpco-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: .5rem 1.25rem;
+  border-radius: calc(var(--ccpco-radius) / 1.5);
+  font-size: var(--ccpco-font-sm); font-weight: 600;
+  text-decoration: none; cursor: pointer; border: none;
+  transition: filter .15s, opacity .15s;
+  white-space: nowrap;
+}
+.ccpco-btn-primary {
+  background-color: var(--ccpco-brand); color: #fff !important;
+}
+.ccpco-btn-primary:hover { filter: brightness(1.12); }
+.ccpco-btn-disabled { background: #e2e8f0; color: #94a3b8 !important; cursor: not-allowed; }
+
+/* ---- Add to Calendar ----------------------------------------------------- */
+.ccpco-cal-wrap { position: relative; display: inline-block; }
+.ccpco-cal-trigger {
+  display: inline-flex; align-items: center; gap: .35rem;
+  background: transparent; border: 1.5px solid var(--ccpco-brand);
+  color: var(--ccpco-brand); border-radius: calc(var(--ccpco-radius) / 1.5);
+  padding: .45rem .9rem; font-size: var(--ccpco-font-xs); font-weight: 600;
+  cursor: pointer; transition: background .15s, color .15s; white-space: nowrap;
+}
+.ccpco-cal-trigger:hover { background: var(--ccpco-brand); color: #fff; }
+.ccpco-cal-trigger svg { width: 13px; height: 13px; flex-shrink: 0; }
+.ccpco-cal-chevron { transition: transform .2s; }
+.ccpco-cal-wrap.open .ccpco-cal-chevron { transform: rotate(180deg); }
+.ccpco-cal-dropdown {
+  display: none; position: absolute; bottom: calc(100% + 6px); left: 0;
+  background: #fff; border: 1px solid var(--ccpco-border);
+  border-radius: calc(var(--ccpco-radius) / 1.5);
+  box-shadow: 0 4px 18px rgba(0,0,0,.12);
+  min-width: 210px; z-index: 9999; overflow: hidden;
+}
+.ccpco-cal-wrap.open .ccpco-cal-dropdown { display: block; }
+.ccpco-cal-option {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .6rem 1rem; color: var(--ccpco-text) !important;
+  text-decoration: none !important; font-size: var(--ccpco-font-sm);
+  transition: background .1s;
+}
+.ccpco-cal-option:hover { background: #f8fafc; }
+.ccpco-cal-option svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* ---- Single detail ------------------------------------------------------- */
+.ccpco-signup-detail { max-width: 720px; }
+.ccpco-detail-hero {
+  width: 100%; border-radius: var(--ccpco-radius);
+  display: block; margin-bottom: 1.5rem;
+}
+.ccpco-detail-body { }
+.ccpco-detail-title { font-size: 1.6rem; font-weight: 700; margin: 0 0 1rem; }
+.ccpco-detail-desc  { line-height: 1.65; margin: 0 0 1.5rem; }
+.ccpco-detail-meta  { display: grid; gap: 1rem; margin-bottom: 1.5rem; }
+
+@media (min-width: 600px) {
+  .ccpco-detail-meta { grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); }
+}
+
+.ccpco-meta-block {
+  padding: 1rem; background: #f8fafc;
+  border: 1px solid var(--ccpco-border);
+  border-radius: calc(var(--ccpco-radius) / 1.5);
+}
+.ccpco-meta-block h3 {
+  font-size: var(--ccpco-font-xs); font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em;
+  color: var(--ccpco-muted); margin: 0 0 .6rem;
+}
+.ccpco-times-list, .ccpco-tickets-list {
+  list-style: none; margin: 0; padding: 0;
+}
+.ccpco-times-list li, .ccpco-tickets-list li {
+  padding: .35rem 0; border-bottom: 1px solid var(--ccpco-border);
+  font-size: var(--ccpco-font-sm);
+}
+.ccpco-times-list li:last-child, .ccpco-tickets-list li:last-child { border: none; }
+.ccpco-tickets-list li { display: flex; justify-content: space-between; }
+.ccpco-ticket-price { font-weight: 600; color: var(--ccpco-brand); }
+.ccpco-detail-actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+
+/* ---- Misc ---------------------------------------------------------------- */
+.ccpco-no-results { color: var(--ccpco-muted); font-style: italic; }
+.ccpco-count { font-weight: 600; }
+.ccpco-admin-notice {
+  border: 1px solid #f87171; background: #fef2f2;
+  border-radius: 4px; padding: .6rem .9rem;
+  color: #dc2626; font-size: var(--ccpco-font-sm);
+}
+
+/* ---- Font size scale (set by global option) ------------------------------ */
+body.ccpco-font-small  { --ccpco-font-sm: .8125rem; --ccpco-font-xs: .75rem; }
+body.ccpco-font-large  { --ccpco-font-sm: 1rem;     --ccpco-font-xs: .875rem; }

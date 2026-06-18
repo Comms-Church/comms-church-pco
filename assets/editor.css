@@ -1,0 +1,23 @@
+/* Comms.Church PCO — Gutenberg editor styles */
+
+.wp-block[data-type^="comms-church-pco"] .components-placeholder {
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.wp-block[data-type^="comms-church-pco"] .components-placeholder__label {
+  font-weight: 700;
+  color: #1a4a8a;
+}
+
+/* Keep ServerSideRender previews from being interactive in editor */
+.wp-block[data-type^="comms-church-pco"] .block-editor-block-list__block-edit > div {
+  pointer-events: none;
+}
+
+/* Loading state */
+.wp-block[data-type^="comms-church-pco"] .components-spinner {
+  margin: 2rem auto;
+  display: block;
+}

@@ -1,0 +1,25 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build artifacts
+build/
+*.zip
+
+# Dependency directories (if ever added)
+node_modules/
+vendor/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local env files
+.env
+.env.local
