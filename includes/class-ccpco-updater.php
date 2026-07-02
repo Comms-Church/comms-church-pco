@@ -12,7 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class Comms_Church_PCO_Updater {
 
     const GITHUB_REPO   = 'Comms-Church/comms-church-pco'; // owner/repo
-    const CACHE_KEY      = 'ccpco_github_release_cache';
+    // Deliberately NOT prefixed 'ccpco_' — keeps the release cache outside
+    // the plugin's data-cache namespace so content flushes never touch it.
+    const CACHE_KEY      = 'ccpcoupd_release';
     const CACHE_TTL       = DAY_IN_SECONDS;
 
     private $plugin_file;   // e.g. comms-church-pco/comms-church-pco.php
@@ -43,23 +45,29 @@ class Comms_Church_PCO_Updater {
 
         $remote_version = $this->normalize_version( $release['tag_name'] );
 
+        $item = new stdClass();
+        $item->slug         = $this->plugin_slug;
+        $item->plugin       = $this->plugin_file;
+        $item->new_version  = $remote_version;
+        $item->url          = 'https://github.com/' . self::GITHUB_REPO;
+        $item->package      = '';
+        $item->tested       = get_bloginfo( 'version' );
+        $item->requires     = '5.8';
+        $item->requires_php = '7.4';
+        $item->icons        = array();
+        $item->banners      = array();
+
         if ( version_compare( $remote_version, $this->version, '>' ) ) {
             $zip_url = $this->get_zip_asset_url( $release );
             if ( ! $zip_url ) return $transient;
 
-            $item = new stdClass();
-            $item->slug         = $this->plugin_slug;
-            $item->plugin       = $this->plugin_file;
-            $item->new_version  = $remote_version;
-            $item->url          = 'https://github.com/' . self::GITHUB_REPO;
-            $item->package      = $zip_url;
-            $item->tested       = get_bloginfo( 'version' );
-            $item->icons        = array();
-            $item->banners      = array();
-
+            $item->package = $zip_url;
             $transient->response[ $this->plugin_file ] = $item;
+            unset( $transient->no_update[ $this->plugin_file ] );
         } else {
-            // Explicitly mark as no update so WP doesn't keep re-checking oddly
+            // Populate no_update so WP's auto-update UI and other plugins
+            // treat this plugin as "checked and current" rather than unknown.
+            $transient->no_update[ $this->plugin_file ] = $item;
             unset( $transient->response[ $this->plugin_file ] );
         }
 

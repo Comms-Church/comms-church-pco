@@ -17,9 +17,31 @@ class CCPCO_Shortcodes {
         add_action( 'wp_ajax_ccpco_preview',  array( $this, 'ajax_preview' ) );
     }
 
+    /**
+     * Register assets, and enqueue early only when the queried content
+     * clearly uses this plugin (block or shortcode in post_content). For
+     * everything else (widgets, theme templates, page builders), the
+     * renderer late-enqueues on demand via CCPCO_Renderer::ensure_assets().
+     */
     public function enqueue() {
-        wp_enqueue_style(  'ccpco-front', CCPCO_PLUGIN_URL . 'assets/front.css', array(), CCPCO_VERSION );
-        wp_enqueue_script( 'ccpco-front', CCPCO_PLUGIN_URL . 'assets/front.js',  array(), CCPCO_VERSION, true );
+        wp_register_style(  'ccpco-front', CCPCO_PLUGIN_URL . 'assets/front.css', array(), CCPCO_VERSION );
+        wp_register_script( 'ccpco-front', CCPCO_PLUGIN_URL . 'assets/front.js',  array(), CCPCO_VERSION, true );
+
+        if ( ! is_singular() ) return;
+        $post = get_post();
+        if ( ! $post ) return;
+
+        $has_block     = function_exists( 'has_block' ) && (
+            has_block( 'comms-church-pco/signup-list', $post ) ||
+            has_block( 'comms-church-pco/signup-card', $post ) ||
+            has_block( 'comms-church-pco/register-button', $post )
+        );
+        $has_shortcode = false !== strpos( (string) $post->post_content, '[pco_' );
+
+        if ( $has_block || $has_shortcode ) {
+            wp_enqueue_style( 'ccpco-front' );
+            wp_enqueue_script( 'ccpco-front' );
+        }
     }
 
     // ---- [pco_signups] -------------------------------------------------------
@@ -176,7 +198,14 @@ class CCPCO_Shortcodes {
     public function ajax_preview() {
         check_ajax_referer( 'ccpco_preview', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized', 403 );
-        $sc   = sanitize_text_field( wp_unslash( $_POST['shortcode'] ?? '' ) );
+
+        $sc = sanitize_text_field( wp_unslash( $_POST['shortcode'] ?? '' ) );
+
+        // Defense in depth: only render this plugin's own shortcodes.
+        if ( ! preg_match( '/^\[pco_[a-z_]+(\s[^\]]*)?\]$/', trim( $sc ) ) ) {
+            wp_send_json_error( __( 'Only PCO shortcodes can be previewed.', 'comms-church-pco' ) );
+        }
+
         $html = '<div class="ccpco-preview-wrap">' . do_shortcode( $sc ) . '</div>';
         wp_send_json_success( $html );
     }

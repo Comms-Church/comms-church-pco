@@ -28,7 +28,12 @@ class CCPCO_Webhook {
         $body = $request->get_body();
 
         if ( ! $this->verify( $body, $sig, $secret ) ) {
-            $this->log( 'Signature verification failed — unauthorized request.' );
+            // Throttle: log failed (unauthenticated) attempts at most once
+            // per 5 minutes so anonymous requests can't spam DB writes.
+            if ( ! get_transient( 'ccpco_wh_fail_logged' ) ) {
+                set_transient( 'ccpco_wh_fail_logged', 1, 5 * MINUTE_IN_SECONDS );
+                $this->log( 'Signature verification failed — unauthorized request.' );
+            }
             return new WP_REST_Response( array( 'error' => 'Unauthorized.' ), 401 );
         }
 

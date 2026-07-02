@@ -16,6 +16,7 @@
   var RangeControl      = components.RangeControl;
   var ColorPicker       = components.ColorPicker;
   var Placeholder       = components.Placeholder;
+  var Button            = components.Button;
   var Spinner           = components.Spinner;
   var Notice            = components.Notice;
 
@@ -24,6 +25,24 @@
   var configured  = data.configured  || false;
   var settingsUrl = data.settingsUrl || '';
   var globalColor = data.brandColor  || '#1a4a8a';
+
+
+  // Color panel with a reset back to the global brand color
+  function colorPanel(attrs, setAttr) {
+    return el( PanelBody, { title: __( 'Brand Color', 'comms-church-pco' ), initialOpen: false },
+      el( 'p', { style:{fontSize:'.8rem',color:'#64748b',marginBottom:'.5rem'} },
+        attrs.brandColor
+          ? __( 'Using a custom color for this block.', 'comms-church-pco' )
+          : __( 'Using the global brand color from Settings.', 'comms-church-pco' ) ),
+      el( ColorPicker, { color: attrs.brandColor || globalColor, onChangeComplete: function(c){ setAttr({brandColor: c.hex}); } } ),
+      attrs.brandColor ? el( Button, {
+        variant: 'secondary',
+        isSmall: true,
+        style: { marginTop: '.5rem' },
+        onClick: function(){ setAttr({brandColor: ''}); }
+      }, __( 'Reset to global color', 'comms-church-pco' ) ) : null
+    );
+  }
 
   // ---- Signup select options -------------------------------------------
   var signupOptions = [{ label: '— select a signup —', value: 0 }].concat(
@@ -81,10 +100,7 @@
             el( RangeControl,  { label: __( 'Capacity (for progress bar)', 'comms-church-pco' ), value: attrs.capacity, onChange: function(v){ setAttr({capacity:v}); }, min:0, max:1000, help: __( 'Set above 0 to show a progress bar. You set the limit — not pulled from PCO.', 'comms-church-pco' ) } )
           ),
 
-          el( PanelBody, { title: __( 'Brand Color', 'comms-church-pco' ), initialOpen: false },
-            el( 'p', { style:{fontSize:'.8rem',color:'#64748b',marginBottom:'.5rem'} }, __( 'Leave unchanged to use global brand color from Settings.', 'comms-church-pco' ) ),
-            el( ColorPicker, { color: attrs.brandColor || globalColor, onChangeComplete: function(c){ setAttr({brandColor: c.hex}); } } )
-          )
+          colorPanel(attrs, setAttr)
 
         ),
 
@@ -133,9 +149,7 @@
             el( TextControl,   { label: __( 'Button Label',     'comms-church-pco' ), value: attrs.buttonLabel, onChange: function(v){ setAttr({buttonLabel:v}); }, placeholder: __( 'Register', 'comms-church-pco' ) } )
           ),
 
-          el( PanelBody, { title: __( 'Brand Color', 'comms-church-pco' ), initialOpen: false },
-            el( ColorPicker, { color: attrs.brandColor || globalColor, onChangeComplete: function(c){ setAttr({brandColor:c.hex}); } } )
-          )
+          colorPanel(attrs, setAttr)
 
         ),
 
@@ -178,9 +192,7 @@
             el( TextControl, { label: __( 'Extra CSS Class', 'comms-church-pco' ), value: attrs.extraClass, onChange: function(v){ setAttr({extraClass:v}); } } )
           ),
 
-          el( PanelBody, { title: __( 'Brand Color', 'comms-church-pco' ), initialOpen: false },
-            el( ColorPicker, { color: attrs.brandColor || globalColor, onChangeComplete: function(c){ setAttr({brandColor:c.hex}); } } )
-          )
+          colorPanel(attrs, setAttr)
 
         ),
 

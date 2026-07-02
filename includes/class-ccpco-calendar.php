@@ -7,8 +7,8 @@ class CCPCO_Calendar {
         $title   = $signup_attrs['name']        ?? '';
         $desc    = $signup_attrs['description'] ?? '';
         $starts  = $time_attrs['starts_at']     ?? '';
-        $ends    = $time_attrs['ends_at']        ?? '';
-        $all_day = $time_attrs['all_day']        ?? false;
+        $ends    = $time_attrs['ends_at']       ?? '';
+        $all_day = ! empty( $time_attrs['all_day'] );
 
         if ( ! $starts ) return '';
 
@@ -42,79 +42,118 @@ class CCPCO_Calendar {
     }
 
     private static function google_url( $title, $desc, $starts, $ends, $all_day, $location ) {
-        $fmt   = $all_day ? 'Ymd' : 'Ymd\THis\Z';
-        $start = gmdate( $fmt, strtotime( $starts ) );
-        $end   = $ends ? gmdate( $fmt, strtotime( $ends ) ) : gmdate( $fmt, strtotime( $starts ) + 3600 );
+        $start_ts = strtotime( $starts );
+        if ( $all_day ) {
+            // Google also expects exclusive end date for all-day ranges.
+            $end_ts = $ends ? strtotime( $ends ) + DAY_IN_SECONDS : $start_ts + DAY_IN_SECONDS;
+            $dates  = gmdate( 'Ymd', $start_ts ) . '/' . gmdate( 'Ymd', $end_ts );
+        } else {
+            $end_ts = $ends ? strtotime( $ends ) : $start_ts + 3600;
+            $dates  = gmdate( 'Ymd\THis\Z', $start_ts ) . '/' . gmdate( 'Ymd\THis\Z', $end_ts );
+        }
         return add_query_arg( array(
             'action'   => 'TEMPLATE',
-            'text'     => urlencode( $title ),
-            'dates'    => $start . '/' . $end,
-            'details'  => urlencode( wp_strip_all_tags( $desc ) ),
-            'location' => urlencode( $location ),
+            'text'     => rawurlencode( $title ),
+            'dates'    => $dates,
+            'details'  => rawurlencode( wp_strip_all_tags( $desc ) ),
+            'location' => rawurlencode( $location ),
         ), 'https://calendar.google.com/calendar/render' );
     }
 
     private static function ical_url( $title, $desc, $starts, $ends, $all_day, $location ) {
-        return add_query_arg( array(
+        // Sanitize BEFORE signing with the exact filters verification applies,
+        // so the signature survives the URL round trip.
+        $args = array(
             'ccpco_ical'  => '1',
-            'title'       => urlencode( $title ),
-            'starts'      => urlencode( $starts ),
-            'ends'        => urlencode( $ends ?: '' ),
+            'title'       => rawurlencode( sanitize_text_field( $title ) ),
+            'starts'      => rawurlencode( sanitize_text_field( $starts ) ),
+            'ends'        => rawurlencode( sanitize_text_field( $ends ?: '' ) ),
             'all_day'     => $all_day ? '1' : '0',
-            'location'    => urlencode( $location ),
-            'description' => urlencode( wp_strip_all_tags( $desc ) ),
-        ), home_url( '/' ) );
+            'location'    => rawurlencode( sanitize_text_field( $location ) ),
+            'description' => rawurlencode( sanitize_text_field( wp_strip_all_tags( $desc ) ) ),
+        );
+        // Sign the link so the public endpoint only serves files WE generated,
+        // not attacker-crafted calendar content hosted on this domain.
+        $args['sig'] = self::sign( $args );
+        return add_query_arg( $args, home_url( '/' ) );
     }
 
     private static function outlook_url( $title, $desc, $starts, $ends, $all_day, $location ) {
         $fmt   = $all_day ? 'Y-m-d' : 'Y-m-d\TH:i:s';
         $start = gmdate( $fmt, strtotime( $starts ) );
-        $end   = $ends ? gmdate( $fmt, strtotime( $ends ) ) : gmdate( $fmt, strtotime( $starts ) + 3600 );
+        $end_ts = $ends ? strtotime( $ends ) : strtotime( $starts ) + ( $all_day ? DAY_IN_SECONDS : 3600 );
+        $end   = gmdate( $fmt, $end_ts );
         return add_query_arg( array(
             'rru'      => 'addevent',
-            'subject'  => urlencode( $title ),
+            'subject'  => rawurlencode( $title ),
             'startdt'  => $start,
             'enddt'    => $end,
-            'body'     => urlencode( wp_strip_all_tags( $desc ) ),
-            'location' => urlencode( $location ),
+            'body'     => rawurlencode( wp_strip_all_tags( $desc ) ),
+            'location' => rawurlencode( $location ),
         ), 'https://outlook.live.com/calendar/0/deeplink/compose' );
+    }
+
+    /** HMAC over the ordered payload fields, keyed with WP salts. */
+    private static function sign( $args ) {
+        unset( $args['sig'] );
+        ksort( $args );
+        return hash_hmac( 'sha256', wp_json_encode( $args ), wp_salt( 'auth' ) );
     }
 
     public static function maybe_serve_ical() {
         if ( empty( $_GET['ccpco_ical'] ) ) return;
 
-        $title    = sanitize_text_field( urldecode( $_GET['title']       ?? '' ) );
-        $starts   = sanitize_text_field( urldecode( $_GET['starts']      ?? '' ) );
-        $ends     = sanitize_text_field( urldecode( $_GET['ends']        ?? '' ) );
-        $all_day  = ! empty( $_GET['all_day'] ) && $_GET['all_day'] === '1';
-        $location = sanitize_text_field( urldecode( $_GET['location']    ?? '' ) );
-        $desc     = sanitize_text_field( urldecode( $_GET['description'] ?? '' ) );
+        // NOTE: PHP has already URL-decoded $_GET — do NOT urldecode again.
+        // (A second decode corrupts titles containing % or + characters.)
+        $raw = array(
+            'ccpco_ical'  => '1',
+            'title'       => rawurlencode( sanitize_text_field( wp_unslash( $_GET['title']       ?? '' ) ) ),
+            'starts'      => rawurlencode( sanitize_text_field( wp_unslash( $_GET['starts']      ?? '' ) ) ),
+            'ends'        => rawurlencode( sanitize_text_field( wp_unslash( $_GET['ends']        ?? '' ) ) ),
+            'all_day'     => ( ! empty( $_GET['all_day'] ) && $_GET['all_day'] === '1' ) ? '1' : '0',
+            'location'    => rawurlencode( sanitize_text_field( wp_unslash( $_GET['location']    ?? '' ) ) ),
+            'description' => rawurlencode( sanitize_text_field( wp_unslash( $_GET['description'] ?? '' ) ) ),
+        );
+
+        $sig = sanitize_text_field( wp_unslash( $_GET['sig'] ?? '' ) );
+        if ( ! $sig || ! hash_equals( self::sign( $raw ), $sig ) ) {
+            wp_die( esc_html__( 'Invalid or expired calendar link.', 'comms-church-pco' ), '', array( 'response' => 403 ) );
+        }
+
+        $title    = sanitize_text_field( wp_unslash( $_GET['title']       ?? '' ) );
+        $starts   = sanitize_text_field( wp_unslash( $_GET['starts']      ?? '' ) );
+        $ends     = sanitize_text_field( wp_unslash( $_GET['ends']        ?? '' ) );
+        $all_day  = $raw['all_day'] === '1';
+        $location = sanitize_text_field( wp_unslash( $_GET['location']    ?? '' ) );
+        $desc     = sanitize_text_field( wp_unslash( $_GET['description'] ?? '' ) );
 
         if ( ! $starts ) wp_die( esc_html__( 'Invalid request.', 'comms-church-pco' ) );
 
         $start_ts = strtotime( $starts );
-        $end_ts   = $ends ? strtotime( $ends ) : $start_ts + 3600;
         $uid      = md5( $title . $starts ) . '@' . parse_url( home_url(), PHP_URL_HOST );
 
         $ics  = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Comms.Church PCO//EN\r\n";
         $ics .= "BEGIN:VEVENT\r\n";
         $ics .= "UID:{$uid}\r\n";
-        $ics .= "SUMMARY:"  . self::ical_escape( $title )    . "\r\n";
-        $ics .= "DESCRIPTION:" . self::ical_escape( $desc )  . "\r\n";
-        $ics .= "LOCATION:" . self::ical_escape( $location ) . "\r\n";
+        $ics .= "SUMMARY:"     . self::ical_escape( $title )    . "\r\n";
+        $ics .= "DESCRIPTION:" . self::ical_escape( $desc )     . "\r\n";
+        $ics .= "LOCATION:"    . self::ical_escape( $location ) . "\r\n";
         if ( $all_day ) {
+            // RFC 5545: DTEND for all-day events is EXCLUSIVE (the day after).
+            $end_ts = $ends ? strtotime( $ends ) + DAY_IN_SECONDS : $start_ts + DAY_IN_SECONDS;
             $ics .= "DTSTART;VALUE=DATE:" . gmdate( 'Ymd', $start_ts ) . "\r\n";
             $ics .= "DTEND;VALUE=DATE:"   . gmdate( 'Ymd', $end_ts )   . "\r\n";
         } else {
+            $end_ts = $ends ? strtotime( $ends ) : $start_ts + 3600;
             $ics .= "DTSTART:" . gmdate( 'Ymd\THis\Z', $start_ts ) . "\r\n";
             $ics .= "DTEND:"   . gmdate( 'Ymd\THis\Z', $end_ts )   . "\r\n";
         }
         $ics .= "DTSTAMP:" . gmdate( 'Ymd\THis\Z' ) . "\r\n";
         $ics .= "END:VEVENT\r\nEND:VCALENDAR\r\n";
 
+        nocache_headers();
         header( 'Content-Type: text/calendar; charset=utf-8' );
         header( 'Content-Disposition: attachment; filename="' . sanitize_title( $title ) . '.ics"' );
-        header( 'Cache-Control: no-cache, must-revalidate' );
         echo $ics;
         exit;
     }

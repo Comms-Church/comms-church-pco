@@ -221,3 +221,26 @@
 /* ---- Font size scale (set by global option) ------------------------------ */
 body.ccpco-font-small  { --ccpco-font-sm: .8125rem; --ccpco-font-xs: .75rem; }
 body.ccpco-font-large  { --ccpco-font-sm: 1rem;     --ccpco-font-xs: .875rem; }
+
+/* ---- Dropdown flip: open downward when near viewport top ------------------ */
+.ccpco-cal-wrap.ccpco-drop-down .ccpco-cal-dropdown {
+  bottom: auto;
+  top: calc(100% + 6px);
+}
+
+/* ---- Reduced motion ------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .ccpco-card,
+  .ccpco-progress-fill,
+  .ccpco-cal-chevron,
+  .ccpco-btn { transition: none !important; }
+  .ccpco-card:hover { transform: none; }
+}
+
+/* ---- Focus visibility ------------------------------------------------------ */
+.ccpco-btn:focus-visible,
+.ccpco-cal-trigger:focus-visible,
+.ccpco-cal-option:focus-visible {
+  outline: 2px solid var(--ccpco-brand);
+  outline-offset: 2px;
+}

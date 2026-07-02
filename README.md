@@ -48,3 +48,33 @@ comms-church-pco/
 ├── assets/                    # CSS/JS for front end, admin, and block editor
 └── .github/workflows/release.yml  # Builds & attaches zip on tag push
 ```
+
+## Changelog
+
+### 1.1.0
+**Compatibility & stability**
+- Added PHP 7.4 compatibility: polyfills for `str_contains`/`str_ends_with` (previously fataled on PHP < 8.0, common on shared church hosting) plus `Requires PHP` header and a graceful deactivation guard for even older PHP.
+- Fixed cache invalidation: flushes previously wiped the stale fallback copies and the updater's release cache, defeating the circuit breaker. Now uses generation-based invalidation — flushes are instant, and stale/updater caches survive by design.
+- Fixed cache-key mismatches left over from an earlier codebase (targeted flushes were silently missing).
+- Fixed a bug where an empty cache-duration setting created never-expiring caches; TTL now has a 60-second floor.
+- Any API failure (not just rate limits) now serves stale data to visitors instead of an error.
+
+**Calendar (.ics) fixes**
+- Fixed double URL-decoding that corrupted event titles containing `%` or `+`.
+- All-day events now set the RFC 5545 exclusive end date (previously rendered wrong in some calendar apps).
+- Calendar download links are now HMAC-signed, so the public .ics endpoint only serves files the site itself generated.
+
+**Performance**
+- Front-end CSS/JS now load only on pages that actually contain PCO content.
+- List caches are keyed on data-affecting settings only — two differently styled blocks now share one API fetch.
+- Category-filtered lists fetch a full page from the API so results aren't silently truncated.
+
+**Polish**
+- "Add to Calendar" dropdown flips downward when near the top of the viewport instead of clipping offscreen.
+- Block editor: color panels now show whether a block uses a custom or global color, with a one-click reset to global.
+- Webhook endpoint throttles failed-authentication logging.
+- Added `uninstall.php` — deleting the plugin now removes all stored options (including API credentials) and caches.
+- Added `prefers-reduced-motion` support and visible keyboard-focus styles.
+
+### 1.0.0
+- Initial release.

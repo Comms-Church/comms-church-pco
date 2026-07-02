@@ -44,10 +44,21 @@ class CCPCO_Renderer {
         // Resolve brand color: arg → global setting → default
         $brand_color = $this->resolve_color( $args['brand_color'] );
 
-        $cache_key = 'list_' . md5( serialize( $args ) );
-        $data = CCPCO_Cache::remember( $cache_key, function() use ( $args ) {
+        self::ensure_assets();
+
+        // Cache on DATA-affecting args only. Presentation args (color, radius,
+        // columns…) don't change the API response, so two differently-styled
+        // blocks share one cached fetch. Category/closed filtering happens
+        // post-fetch, so fetch a fuller page when those filters are active.
+        $has_post_filter = ( trim( $args['category'] ) !== '' ) || ! $args['show_closed'];
+        $per_page        = $has_post_filter
+            ? 100
+            : min( 100, max( 24, intval( $args['limit'] ) * 3 ) );
+
+        $cache_key = 'list_' . $per_page . '_' . sanitize_text_field( $args['filter'] );
+        $data = CCPCO_Cache::remember( $cache_key, function() use ( $args, $per_page ) {
             return $this->api->get_signups( array(
-                'per_page' => min( 100, intval( $args['limit'] ) * 3 ),
+                'per_page' => $per_page,
                 'filter'   => sanitize_text_field( $args['filter'] ),
                 'include'  => 'next_signup_time,signup_location,categories',
             ) );
@@ -126,6 +137,8 @@ class CCPCO_Renderer {
 
         $brand_color = $this->resolve_color( $args['brand_color'] );
 
+        self::ensure_assets();
+
         $data = CCPCO_Cache::remember( 'detail_' . $signup_id, function() use ( $signup_id ) {
             return $this->api->get_signup( $signup_id, array( 'signup_times', 'signup_location' ) );
         } );
@@ -140,10 +153,10 @@ class CCPCO_Renderer {
         $locs     = array_values( array_filter( $included, fn( $i ) => $i['type'] === 'SignupLocation' ) );
         $location = $locs[0] ?? null;
 
-        // Tickets
+        // Tickets (same cache key as [pco_ticket_types public_only=true])
         $tickets = array();
         if ( $args['show_tickets'] ) {
-            $t = CCPCO_Cache::remember( 'tickets_' . $signup_id, function() use ( $signup_id ) {
+            $t = CCPCO_Cache::remember( 'tickets_' . $signup_id . '_1', function() use ( $signup_id ) {
                 return $this->api->get_selection_types( $signup_id );
             } );
             if ( ! is_wp_error( $t ) ) $tickets = $t['data'] ?? array();
@@ -247,6 +260,8 @@ class CCPCO_Renderer {
         if ( ! $signup_id ) return '';
         $brand_color = $this->resolve_color( $args['brand_color'] );
 
+        self::ensure_assets();
+
         $data = CCPCO_Cache::remember( 'btn_' . $signup_id, function() use ( $signup_id ) {
             return $this->api->get_signup( $signup_id );
         } );
@@ -274,6 +289,7 @@ class CCPCO_Renderer {
     // Attendee count
     // =========================================================================
     public function attendee_count( $signup_id, $label = 'registered' ) {
+        self::ensure_assets();
         $data = CCPCO_Cache::remember( 'count_' . $signup_id, function() use ( $signup_id ) {
             return $this->api->get_attendees( $signup_id, array( 'filter' => 'active', 'per_page' => 1 ) );
         }, 120 );
@@ -471,6 +487,17 @@ class CCPCO_Renderer {
 
     private function icon_location() {
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>';
+    }
+
+    /**
+     * Enqueue front-end assets on demand. Styles/scripts are REGISTERED on
+     * wp_enqueue_scripts (see CCPCO_Shortcodes::enqueue) but only enqueued
+     * here, when something actually renders — so pages without any PCO
+     * content load zero extra bytes.
+     */
+    public static function ensure_assets() {
+        if ( wp_style_is( 'ccpco-front', 'registered' ) )  wp_enqueue_style( 'ccpco-front' );
+        if ( wp_script_is( 'ccpco-front', 'registered' ) ) wp_enqueue_script( 'ccpco-front' );
     }
 
     public function admin_notice( $message ) {
