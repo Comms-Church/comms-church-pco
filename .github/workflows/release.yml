@@ -43,6 +43,7 @@ jobs:
         run: |
           mkdir -p build/comms-church-pco
           rsync -a --exclude='.git' --exclude='.github' --exclude='build' --exclude='.gitignore' \
+            --exclude='.gitattributes' --exclude='deploy.sh' --exclude='.DS_Store' \
             ./ build/comms-church-pco/
           cd build
           zip -r comms-church-pco.zip comms-church-pco
