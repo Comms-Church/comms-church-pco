@@ -16,6 +16,11 @@ build/
 node_modules/
 vendor/
 
+# Test tooling artifacts
+test-results/
+playwright-report/
+screenshots/
+
 # Logs
 *.log
 npm-debug.log*
