@@ -24,6 +24,16 @@ class CCPCO_Admin {
     }
 
     public function maybe_notice() {
+        // Conflict check: the GCC-specific PCO plugin registers the SAME
+        // shortcode names. Running both means whichever loads last silently
+        // wins, producing mismatched markup vs. loaded styles.
+        if ( class_exists( 'GCC_Shortcodes' ) || function_exists( 'gccpco_init' ) ) {
+            echo '<div class="notice notice-error"><p>'
+                . '<strong>Comms.Church PCO:</strong> '
+                . esc_html__( 'The GCC-specific PCO Registrations plugin is also active. Both plugins register the same shortcodes and will conflict — please deactivate one of them.', 'comms-church-pco' )
+                . '</p></div>';
+        }
+
         $screen = get_current_screen();
         if ( $screen && in_array( $screen->id, array( 'settings_page_ccpco-settings', 'settings_page_ccpco-generator' ) ) ) return;
         if ( ! get_option( 'ccpco_app_id' ) || ! get_option( 'ccpco_secret' ) ) {
@@ -371,6 +381,7 @@ class CCPCO_Admin {
                             <li><?php esc_html_e('Copy the shortcode and paste it into any page, post, or Classic Widget.','comms-church-pco');?></li>
                             <li><?php esc_html_e('In the Block Editor, use a Shortcode block and paste it there.','comms-church-pco');?></li>
                             <li><?php esc_html_e('Or search for "PCO" in the block inserter to add a native block directly.','comms-church-pco');?></li>
+                            <li><?php esc_html_e('On Bricks Builder sites, search for "PCO" in the Bricks element panel — native elements with visual controls, no shortcode needed.','comms-church-pco');?></li>
                         </ul>
                         <h3 style="margin-top:1rem"><?php esc_html_e('Finding a Signup ID','comms-church-pco');?></h3>
                         <p><?php esc_html_e('Open a signup in PCO and read the number from the URL:','comms-church-pco');?><br>

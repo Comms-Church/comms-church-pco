@@ -496,8 +496,14 @@ class CCPCO_Renderer {
      * content load zero extra bytes.
      */
     public static function ensure_assets() {
-        if ( wp_style_is( 'ccpco-front', 'registered' ) )  wp_enqueue_style( 'ccpco-front' );
-        if ( wp_script_is( 'ccpco-front', 'registered' ) ) wp_enqueue_script( 'ccpco-front' );
+        if ( ! wp_style_is( 'ccpco-front', 'registered' ) ) {
+            wp_register_style( 'ccpco-front', CCPCO_PLUGIN_URL . 'assets/front.css', array(), CCPCO_VERSION );
+        }
+        if ( ! wp_script_is( 'ccpco-front', 'registered' ) ) {
+            wp_register_script( 'ccpco-front', CCPCO_PLUGIN_URL . 'assets/front.js', array(), CCPCO_VERSION, true );
+        }
+        wp_enqueue_style( 'ccpco-front' );
+        wp_enqueue_script( 'ccpco-front' );
     }
 
     public function admin_notice( $message ) {

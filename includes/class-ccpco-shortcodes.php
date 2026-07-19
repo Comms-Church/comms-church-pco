@@ -13,19 +13,32 @@ class CCPCO_Shortcodes {
         add_shortcode( 'pco_attendee_count',  array( $this, 'sc_attendee_count' ) );
         add_shortcode( 'pco_signup_times',    array( $this, 'sc_signup_times' ) );
         add_shortcode( 'pco_ticket_types',    array( $this, 'sc_ticket_types' ) );
-        add_action( 'wp_enqueue_scripts',     array( $this, 'enqueue' ) );
+        add_action( 'wp_enqueue_scripts',     array( $this, 'enqueue' ), 1 );
         add_action( 'wp_ajax_ccpco_preview',  array( $this, 'ajax_preview' ) );
     }
 
     /**
-     * Register assets, and enqueue early only when the queried content
-     * clearly uses this plugin (block or shortcode in post_content). For
-     * everything else (widgets, theme templates, page builders), the
-     * renderer late-enqueues on demand via CCPCO_Renderer::ensure_assets().
+     * Register assets, and enqueue early (in <head>) whenever the page may
+     * contain PCO content, so it renders styled on first paint:
+     *
+     * - Bricks sites: enqueue always. Bricks stores content in its own meta,
+     *   not post_content, so content sniffing can't see it — and shortcodes
+     *   or elements can live in Bricks templates, headers, and footers.
+     * - Block-editor sites: enqueue when post_content contains a PCO block
+     *   or shortcode.
+     * - Anything else (widgets, other builders): the renderer late-enqueues
+     *   via CCPCO_Renderer::ensure_assets(), printed in the footer.
      */
     public function enqueue() {
         wp_register_style(  'ccpco-front', CCPCO_PLUGIN_URL . 'assets/front.css', array(), CCPCO_VERSION );
         wp_register_script( 'ccpco-front', CCPCO_PLUGIN_URL . 'assets/front.js',  array(), CCPCO_VERSION, true );
+
+        // Bricks: always load in head — content detection is unreliable there.
+        if ( class_exists( 'CCPCO_Bricks' ) && CCPCO_Bricks::is_active() ) {
+            wp_enqueue_style( 'ccpco-front' );
+            wp_enqueue_script( 'ccpco-front' );
+            return;
+        }
 
         if ( ! is_singular() ) return;
         $post = get_post();

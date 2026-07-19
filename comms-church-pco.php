@@ -3,7 +3,7 @@
  * Plugin Name:       Comms.Church — Planning Center Registrations
  * Plugin URI:        https://github.com/Comms-Church/comms-church-pco
  * Description:       Display Planning Center Registrations events on any WordPress site via Gutenberg blocks and shortcodes. API credentials stored securely server-side.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            Comms.Church
  * Author URI:        https://comms.church
  * License:           GPL-2.0+
@@ -29,7 +29,7 @@ if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
     return;
 }
 
-define( 'CCPCO_VERSION',     '1.1.0' );
+define( 'CCPCO_VERSION',     '1.2.0' );
 define( 'CCPCO_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'CCPCO_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
 define( 'CCPCO_PLUGIN_FILE', __FILE__ );
@@ -41,6 +41,7 @@ require_once CCPCO_PLUGIN_DIR . 'includes/class-ccpco-calendar.php';
 require_once CCPCO_PLUGIN_DIR . 'includes/class-ccpco-renderer.php';
 require_once CCPCO_PLUGIN_DIR . 'includes/class-ccpco-shortcodes.php';
 require_once CCPCO_PLUGIN_DIR . 'includes/class-ccpco-blocks.php';
+require_once CCPCO_PLUGIN_DIR . 'includes/class-ccpco-bricks.php';
 require_once CCPCO_PLUGIN_DIR . 'includes/class-ccpco-webhook.php';
 require_once CCPCO_PLUGIN_DIR . 'includes/class-ccpco-admin.php';
 
@@ -58,6 +59,7 @@ class CCPCO {
         new CCPCO_Admin();
         new CCPCO_Shortcodes();
         new CCPCO_Blocks();
+        new CCPCO_Bricks();
         new CCPCO_Webhook();
 
         if ( is_admin() && class_exists( 'Comms_Church_PCO_Updater' ) ) {

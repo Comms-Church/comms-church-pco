@@ -51,6 +51,14 @@ comms-church-pco/
 
 ## Changelog
 
+### 1.2.0
+**Bricks Builder support**
+- Added three native Bricks elements — PCO Signup List, PCO Signup Card, and PCO Register Button — under a "Planning Center" category in the Bricks element panel, with full visual controls. Registered only when Bricks is active; Gutenberg blocks and shortcodes remain available everywhere.
+- Fixed broken styling on Bricks sites: v1.1.0's conditional asset loading sniffed post_content for PCO shortcodes, but Bricks stores content in its own meta fields, so styles never loaded in the head. On Bricks sites the stylesheet now always loads in the head; Bricks elements also declare their assets via the proper enqueue_scripts() mechanism.
+- Asset loading is now self-registering, so late/builder-context rendering can never produce unstyled output.
+- Added an admin warning when the GCC-specific PCO plugin is active alongside this one (both register the same shortcode names and will conflict).
+
+
 ### 1.1.0
 **Compatibility & stability**
 - Added PHP 7.4 compatibility: polyfills for `str_contains`/`str_ends_with` (previously fataled on PHP < 8.0, common on shared church hosting) plus `Requires PHP` header and a graceful deactivation guard for even older PHP.
