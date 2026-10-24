@@ -3,7 +3,7 @@
  * Plugin Name:       Comms.Church — Planning Center Registrations
  * Plugin URI:        https://github.com/Comms-Church/comms-church-pco
  * Description:       Display Planning Center Registrations events on any WordPress site via Gutenberg blocks and shortcodes. API credentials stored securely server-side.
- * Version:           1.2.1
+ * Version:           1.3.0
  * Author:            Comms.Church
  * Author URI:        https://comms.church
  * License:           GPL-2.0+
@@ -29,7 +29,7 @@ if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
     return;
 }
 
-define( 'CCPCO_VERSION',     '1.2.1' );
+define( 'CCPCO_VERSION',     '1.3.0' );
 define( 'CCPCO_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'CCPCO_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
 define( 'CCPCO_PLUGIN_FILE', __FILE__ );
