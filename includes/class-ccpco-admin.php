@@ -270,17 +270,17 @@ class CCPCO_Admin {
 
                 <!-- Controls -->
                 <div class="ccpco-card ccpco-gen-controls">
-                    <div class="ccpco-gen-tabs">
-                        <button class="ccpco-tab active" data-tab="signups"><?php esc_html_e( 'Signup List', 'comms-church-pco' ); ?></button>
-                        <button class="ccpco-tab" data-tab="signup"><?php esc_html_e( 'Single Signup', 'comms-church-pco' ); ?></button>
-                        <button class="ccpco-tab" data-tab="register_button"><?php esc_html_e( 'Register Button', 'comms-church-pco' ); ?></button>
-                        <button class="ccpco-tab" data-tab="attendee_count"><?php esc_html_e( 'Attendee Count', 'comms-church-pco' ); ?></button>
-                        <button class="ccpco-tab" data-tab="signup_times"><?php esc_html_e( 'Signup Times', 'comms-church-pco' ); ?></button>
-                        <button class="ccpco-tab" data-tab="ticket_types"><?php esc_html_e( 'Ticket Types', 'comms-church-pco' ); ?></button>
+                    <div class="ccpco-gen-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Shortcode type', 'comms-church-pco' ); ?>">
+                        <button type="button" class="ccpco-tab active" data-tab="signups" role="tab" id="tabbtn-signups" aria-controls="tab-signups" aria-selected="true" tabindex="0"><?php esc_html_e( 'Signup List', 'comms-church-pco' ); ?></button>
+                        <button type="button" class="ccpco-tab" data-tab="signup" role="tab" id="tabbtn-signup" aria-controls="tab-signup" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Single Signup', 'comms-church-pco' ); ?></button>
+                        <button type="button" class="ccpco-tab" data-tab="register_button" role="tab" id="tabbtn-register_button" aria-controls="tab-register_button" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Register Button', 'comms-church-pco' ); ?></button>
+                        <button type="button" class="ccpco-tab" data-tab="attendee_count" role="tab" id="tabbtn-attendee_count" aria-controls="tab-attendee_count" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Attendee Count', 'comms-church-pco' ); ?></button>
+                        <button type="button" class="ccpco-tab" data-tab="signup_times" role="tab" id="tabbtn-signup_times" aria-controls="tab-signup_times" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Signup Times', 'comms-church-pco' ); ?></button>
+                        <button type="button" class="ccpco-tab" data-tab="ticket_types" role="tab" id="tabbtn-ticket_types" aria-controls="tab-ticket_types" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Ticket Types', 'comms-church-pco' ); ?></button>
                     </div>
 
                     <!-- pco_signups -->
-                    <div class="ccpco-tab-panel active" id="tab-signups">
+                    <div class="ccpco-tab-panel active" id="tab-signups" role="tabpanel" aria-labelledby="tabbtn-signups">
                         <p class="ccpco-tab-desc"><?php esc_html_e( 'Grid or list of signups from your organization.', 'comms-church-pco' ); ?></p>
                         <table class="form-table ccpco-gen-form">
                             <tr><th><?php esc_html_e('Display Style','comms-church-pco');?></th><td><select data-attr="display"><option value="tiles"><?php esc_html_e('Tiles','comms-church-pco');?></option><option value="list"><?php esc_html_e('List','comms-church-pco');?></option></select></td></tr>
@@ -303,7 +303,7 @@ class CCPCO_Admin {
                     </div>
 
                     <!-- pco_signup -->
-                    <div class="ccpco-tab-panel" id="tab-signup">
+                    <div class="ccpco-tab-panel" id="tab-signup" role="tabpanel" aria-labelledby="tabbtn-signup">
                         <p class="ccpco-tab-desc"><?php esc_html_e('Full detail card for one signup.','comms-church-pco');?></p>
                         <table class="form-table ccpco-gen-form">
                             <tr><th><?php esc_html_e('Signup','comms-church-pco');?></th><td><select data-attr="id" class="ccpco-signup-picker"><option value=""><?php esc_html_e('— select —','comms-church-pco');?></option></select><p class="description"><?php esc_html_e('Or type ID:','comms-church-pco');?></p><input type="number" data-attr="id" class="ccpco-id-manual" style="margin-top:4px"></td></tr>
@@ -318,7 +318,7 @@ class CCPCO_Admin {
                     </div>
 
                     <!-- pco_register_button -->
-                    <div class="ccpco-tab-panel" id="tab-register_button">
+                    <div class="ccpco-tab-panel" id="tab-register_button" role="tabpanel" aria-labelledby="tabbtn-register_button">
                         <p class="ccpco-tab-desc"><?php esc_html_e('Standalone button — auto-disables when signup closes.','comms-church-pco');?></p>
                         <table class="form-table ccpco-gen-form">
                             <tr><th><?php esc_html_e('Signup','comms-church-pco');?></th><td><select data-attr="id" class="ccpco-signup-picker"><option value=""><?php esc_html_e('— select —','comms-church-pco');?></option></select><p class="description"><?php esc_html_e('Or type ID:','comms-church-pco');?></p><input type="number" data-attr="id" class="ccpco-id-manual" style="margin-top:4px"></td></tr>
@@ -329,7 +329,7 @@ class CCPCO_Admin {
                     </div>
 
                     <!-- pco_attendee_count -->
-                    <div class="ccpco-tab-panel" id="tab-attendee_count">
+                    <div class="ccpco-tab-panel" id="tab-attendee_count" role="tabpanel" aria-labelledby="tabbtn-attendee_count">
                         <p class="ccpco-tab-desc"><?php esc_html_e('Live count — outputs e.g. "47 registered".','comms-church-pco');?></p>
                         <table class="form-table ccpco-gen-form">
                             <tr><th><?php esc_html_e('Signup','comms-church-pco');?></th><td><select data-attr="id" class="ccpco-signup-picker"><option value=""><?php esc_html_e('— select —','comms-church-pco');?></option></select><input type="number" data-attr="id" class="ccpco-id-manual" style="margin-top:4px"></td></tr>
@@ -338,7 +338,7 @@ class CCPCO_Admin {
                     </div>
 
                     <!-- pco_signup_times -->
-                    <div class="ccpco-tab-panel" id="tab-signup_times">
+                    <div class="ccpco-tab-panel" id="tab-signup_times" role="tabpanel" aria-labelledby="tabbtn-signup_times">
                         <p class="ccpco-tab-desc"><?php esc_html_e('List all event times for a signup.','comms-church-pco');?></p>
                         <table class="form-table ccpco-gen-form">
                             <tr><th><?php esc_html_e('Signup','comms-church-pco');?></th><td><select data-attr="id" class="ccpco-signup-picker"><option value=""><?php esc_html_e('— select —','comms-church-pco');?></option></select><input type="number" data-attr="id" class="ccpco-id-manual" style="margin-top:4px"></td></tr>
@@ -348,7 +348,7 @@ class CCPCO_Admin {
                     </div>
 
                     <!-- pco_ticket_types -->
-                    <div class="ccpco-tab-panel" id="tab-ticket_types">
+                    <div class="ccpco-tab-panel" id="tab-ticket_types" role="tabpanel" aria-labelledby="tabbtn-ticket_types">
                         <p class="ccpco-tab-desc"><?php esc_html_e('List ticket/registration options with prices.','comms-church-pco');?></p>
                         <table class="form-table ccpco-gen-form">
                             <tr><th><?php esc_html_e('Signup','comms-church-pco');?></th><td><select data-attr="id" class="ccpco-signup-picker"><option value=""><?php esc_html_e('— select —','comms-church-pco');?></option></select><input type="number" data-attr="id" class="ccpco-id-manual" style="margin-top:4px"></td></tr>

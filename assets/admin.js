@@ -108,16 +108,33 @@
   }
 
   // ---- Tabs --------------------------------------------------------------
-  document.querySelectorAll('.ccpco-tab').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      document.querySelectorAll('.ccpco-tab').forEach(function (b) { b.classList.remove('active'); });
-      document.querySelectorAll('.ccpco-tab-panel').forEach(function (p) { p.classList.remove('active'); });
-      btn.classList.add('active');
-      activeTab = btn.dataset.tab;
-      var panel = document.getElementById('tab-' + activeTab);
-      if (panel) panel.classList.add('active');
-      updateOutput();
-      schedulePreview();
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.ccpco-tab'));
+  function selectTab(btn) {
+    tabs.forEach(function (b) {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+      b.setAttribute('tabindex', '-1');
+    });
+    document.querySelectorAll('.ccpco-tab-panel').forEach(function (p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    btn.setAttribute('tabindex', '0');
+    activeTab = btn.dataset.tab;
+    var panel = document.getElementById('tab-' + activeTab);
+    if (panel) panel.classList.add('active');
+    updateOutput();
+    schedulePreview();
+  }
+  tabs.forEach(function (btn, i) {
+    btn.addEventListener('click', function () { selectTab(btn); });
+    // Standard tablist keys: arrows move and select, Home/End jump.
+    btn.addEventListener('keydown', function (e) {
+      var next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (next === undefined) return;
+      e.preventDefault();
+      var t = tabs[(next + tabs.length) % tabs.length];
+      t.focus();
+      selectTab(t);
     });
   });
 
@@ -188,10 +205,10 @@
   });
 
   // ---- Live preview ------------------------------------------------------
-  var previewTimer = null;
+  var previewTimer = null, previewCtrl = null;
   function schedulePreview() {
     clearTimeout(previewTimer);
-    previewTimer = setTimeout(doPreview, 700);
+    previewTimer = setTimeout(doPreview, 250);
   }
   function doPreview() {
     if (!window.CCPCOAdmin || !CCPCOAdmin.ajax_url) return;
@@ -199,7 +216,13 @@
     var frame = document.getElementById('ccpco-gen-preview');
     if (!sc || !frame) return;
 
-    frame.innerHTML = '<p style="color:#94a3b8;font-style:italic">Loading preview…</p>';
+    // Keep the current preview on screen (dimmed) while the next one loads,
+    // and drop any older request so a slow response can't overwrite a newer one.
+    if (previewCtrl) previewCtrl.abort();
+    previewCtrl = window.AbortController ? new AbortController() : null;
+    if (!frame.children.length) frame.innerHTML = '<p style="color:#64748b;font-style:italic">Loading preview…</p>';
+    frame.setAttribute('aria-busy', 'true');
+    frame.style.opacity = '.55';
 
     var data = new URLSearchParams({
       action:    'ccpco_preview',
@@ -207,19 +230,23 @@
       shortcode: sc,
     });
 
-    fetch(CCPCOAdmin.ajax_url, { method: 'POST', body: data })
+    var done = function () { frame.removeAttribute('aria-busy'); frame.style.opacity = ''; };
+    fetch(CCPCOAdmin.ajax_url, { method: 'POST', body: data, signal: previewCtrl ? previewCtrl.signal : undefined })
       .then(function (r) { return r.json(); })
       .then(function (res) {
-        frame.innerHTML = res.success ? res.data : '<p style="color:#dc2626">Preview error.</p>';
+        frame.innerHTML = res.success ? res.data : '<p class="ccpco-admin-notice">Preview error.</p>';
+        done();
       })
-      .catch(function () {
-        frame.innerHTML = '<p style="color:#dc2626">Preview failed.</p>';
+      .catch(function (e) {
+        if (e && e.name === 'AbortError') return;   // superseded by a newer request
+        frame.innerHTML = '<p class="ccpco-admin-notice">Preview failed.</p>';
+        done();
       });
   }
 
   // ---- Init --------------------------------------------------------------
   populatePickers();
   updateOutput();
-  setTimeout(schedulePreview, 800);
+  schedulePreview();
 
 })();

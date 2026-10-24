@@ -104,11 +104,15 @@ class CCPCO_Renderer {
         $display = in_array( $args['display'], array( 'tiles', 'list' ) ) ? $args['display'] : 'tiles';
 
         ob_start(); ?>
+        <?php /* The wrapper is the container-query context, so columns follow the
+                 space the block gets rather than the window width. */ ?>
+        <div class="ccpco-signup-list-wrap">
         <div class="ccpco-signup-list ccpco-display-<?php echo esc_attr( $display ); ?> ccpco-cols-<?php echo esc_attr( $cols ); ?>"
              style="--ccpco-brand:<?php echo esc_attr( $brand_color ); ?>;--ccpco-radius:<?php echo esc_attr( $radius ); ?>px">
         <?php foreach ( $filtered as $signup ) :
             echo $this->signup_card_html( $signup, $args, $times_map, $location_map, $brand_color );
         endforeach; ?>
+        </div>
         </div>
         <?php return ob_get_clean();
     }

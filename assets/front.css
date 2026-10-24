@@ -16,6 +16,9 @@
 }
 
 /* ---- Grid ---------------------------------------------------------------- */
+/* Column count follows the space the block actually has (a Bricks column, a
+   sidebar), not the window width. The wrapper is the query container. */
+.ccpco-signup-list-wrap { container-type: inline-size; }
 .ccpco-signup-list {
   display: grid;
   gap: var(--ccpco-gap);
@@ -29,14 +32,28 @@
 .ccpco-display-list .ccpco-card { flex-direction: row; }
 .ccpco-display-list .ccpco-card-image { flex: 0 0 220px; }
 
-@media (max-width: 960px) {
+@container (max-width: 760px) {
   .ccpco-display-tiles.ccpco-cols-3,
   .ccpco-display-tiles.ccpco-cols-4 { grid-template-columns: repeat(2,1fr); }
 }
-@media (max-width: 600px) {
-  .ccpco-display-tiles,
+/* [class*=] adds specificity so this beats the .ccpco-display-tiles.ccpco-cols-N
+   rules above — with a bare .ccpco-display-tiles, phones never got one column. */
+@container (max-width: 480px) {
+  .ccpco-display-tiles[class*="ccpco-cols-"],
   .ccpco-display-list .ccpco-card { grid-template-columns: 1fr; flex-direction: column; }
   .ccpco-display-list .ccpco-card-image { flex: none; border-radius: var(--ccpco-radius) var(--ccpco-radius) 0 0; }
+}
+/* Browsers without container queries keep the old viewport breakpoints. */
+@supports not (container-type: inline-size) {
+  @media (max-width: 960px) {
+    .ccpco-display-tiles.ccpco-cols-3,
+    .ccpco-display-tiles.ccpco-cols-4 { grid-template-columns: repeat(2,1fr); }
+  }
+  @media (max-width: 600px) {
+    .ccpco-display-tiles[class*="ccpco-cols-"],
+    .ccpco-display-list .ccpco-card { grid-template-columns: 1fr; flex-direction: column; }
+    .ccpco-display-list .ccpco-card-image { flex: none; border-radius: var(--ccpco-radius) var(--ccpco-radius) 0 0; }
+  }
 }
 
 /* ---- Card ---------------------------------------------------------------- */
@@ -78,7 +95,7 @@
 .ccpco-closed-badge {
   position: absolute; top: .6rem; right: .6rem;
   background: rgba(0,0,0,.55); color: #fff;
-  font-size: .7rem; font-weight: 700; letter-spacing: .05em;
+  font-size: .75rem; font-weight: 700; letter-spacing: .05em;
   text-transform: uppercase; padding: .2rem .55rem;
   border-radius: 99px;
 }
@@ -89,8 +106,8 @@
   display: flex; flex-direction: column; gap: .5rem; flex: 1;
 }
 .ccpco-card-title {
-  font-size: 1.05rem; font-weight: 700;
-  color: var(--ccpco-text); margin: 0 0 .25rem; line-height: 1.3;
+  font-size: 1.2rem; font-weight: 700; letter-spacing: -0.01em;
+  color: var(--ccpco-text); margin: 0 0 .25rem; line-height: 1.25;
 }
 .ccpco-card-meta { display: flex; flex-direction: column; gap: .3rem; }
 
@@ -156,7 +173,7 @@
   display: inline-flex; align-items: center; gap: .35rem;
   background: transparent; border: 1.5px solid var(--ccpco-brand);
   color: var(--ccpco-brand); border-radius: calc(var(--ccpco-radius) / 1.5);
-  padding: .45rem .9rem; font-size: var(--ccpco-font-xs); font-weight: 600;
+  min-height: 40px; padding: .45rem .9rem; font-size: var(--ccpco-font-sm); font-weight: 600;
   cursor: pointer; transition: background .15s, color .15s; white-space: nowrap;
 }
 .ccpco-cal-trigger:hover { background: var(--ccpco-brand); color: #fff; }
@@ -195,7 +212,7 @@
   display: block; margin-bottom: 1.5rem;
 }
 .ccpco-detail-body { }
-.ccpco-detail-title { font-size: 1.6rem; font-weight: 700; margin: 0 0 1rem; }
+.ccpco-detail-title { font-size: 1.6rem; font-weight: 700; margin: 0 0 1rem; letter-spacing: -0.02em; line-height: 1.15; }
 .ccpco-detail-desc  { line-height: 1.65; margin: 0 0 1.5rem; }
 .ccpco-detail-meta  { display: grid; gap: 1rem; margin-bottom: 1.5rem; }
 
