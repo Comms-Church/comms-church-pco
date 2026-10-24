@@ -30,7 +30,8 @@
 
 .ccpco-display-list { grid-template-columns: 1fr; }
 .ccpco-display-list .ccpco-card { flex-direction: row; }
-.ccpco-display-list .ccpco-card-image { flex: 0 0 220px; }
+/* Kept above the container queries so their stacked-layout radius wins on phones. */
+.ccpco-display-list .ccpco-card-image { flex: 0 0 220px; border-radius: var(--ccpco-radius) 0 0 var(--ccpco-radius); }
 
 @container (max-width: 760px) {
   .ccpco-display-tiles.ccpco-cols-3,
@@ -78,7 +79,6 @@
   position: relative; overflow: hidden; background: #f1f5f9;
   border-radius: var(--ccpco-radius) var(--ccpco-radius) 0 0;
 }
-.ccpco-display-list .ccpco-card-image { border-radius: var(--ccpco-radius) 0 0 var(--ccpco-radius); }
 .ccpco-shape-cinematic { padding-top: 56.25%; }
 .ccpco-shape-square    { padding-top: 100%; }
 .ccpco-shape-portrait  { padding-top: 133%; }
