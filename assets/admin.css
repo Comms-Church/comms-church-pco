@@ -1,7 +1,10 @@
+/* Follows the WordPress admin color scheme where one is set. */
+:root { --ccpco-admin-accent: var(--wp-admin-theme-color, #1a4a8a); }
+
 /* Comms.Church PCO — admin styles */
 .ccpco-wrap { max-width: 1200px; }
 
-.ccpco-header { border-bottom: 3px solid #1a4a8a; padding-bottom: .75rem; margin-bottom: 1.5rem; }
+.ccpco-header { border-bottom: 3px solid var(--ccpco-admin-accent); padding-bottom: .75rem; margin-bottom: 1.5rem; }
 .ccpco-header h1 { margin: 0 0 .1rem; }
 .ccpco-tagline { color: #64748b; font-size: .85rem; margin: 0; }
 
@@ -21,7 +24,7 @@
   border-radius: 8px;
   padding: 1.5rem 1.75rem;
 }
-.ccpco-card h2 { margin-top: 0; font-size: 1.1rem; border-bottom: 2px solid #1a4a8a; padding-bottom: .5rem; }
+.ccpco-card h2 { margin-top: 0; font-size: 1.1rem; border-bottom: 2px solid var(--ccpco-admin-accent); padding-bottom: .5rem; }
 
 .ccpco-badge {
   display: inline-block; font-size: .75rem; font-weight: 400;
@@ -43,6 +46,7 @@
 @media (max-width: 1100px) { .ccpco-gen-layout { grid-template-columns: 1fr; } }
 
 .ccpco-gen-sidebar { position: sticky; top: 32px; }
+.ccpco-gen-preview-card { margin-top: 1.5rem; }
 
 .ccpco-gen-tabs {
   display: flex; flex-wrap: wrap; gap: .4rem;
@@ -54,7 +58,8 @@
   transition: background .15s;
 }
 .ccpco-tab:hover { background: #e2e8f0; }
-.ccpco-tab.active { background: #1a4a8a; color: #fff; border-color: #1a4a8a; }
+.ccpco-tab.active { background: var(--ccpco-admin-accent); color: #fff; border-color: var(--ccpco-admin-accent); }
+.ccpco-tab:focus-visible { outline: 2px solid var(--ccpco-admin-accent); outline-offset: 2px; }
 
 .ccpco-tab-panel { display: none; }
 .ccpco-tab-panel.active { display: block; }
@@ -83,8 +88,11 @@
 
 .ccpco-gen-preview {
   min-height: 80px; border: 1px dashed #cbd5e1; border-radius: 6px;
-  padding: 1rem; background: #f8fafc;
+  padding: 1rem; background: #f8fafc; transition: opacity .15s ease;
 }
+/* Front-end signup cards share the .ccpco-card class with the admin panels
+   above — undo the panel chrome so the preview matches the live page. */
+.ccpco-gen-preview .ccpco-card { padding: 0; border: 0; border-radius: var(--ccpco-radius); }
 
 .ccpco-tips h3 { font-size: .95rem; margin-top: 1rem; }
 .ccpco-tips h3:first-child { margin-top: 0; }
