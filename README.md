@@ -51,6 +51,13 @@ comms-church-pco/
 
 ## Changelog
 
+### 1.3.0
+**Design and accessibility pass**
+- Add to Calendar now drops down from its button and works from the keyboard (arrow keys, Escape, Tab closes it). Cards no longer clip it.
+- Signup grids follow the space they're placed in, so a 3- or 4-column list in a narrow Bricks column or sidebar no longer squeezes into tiny columns. Fixed: on phones, 3- and 4-column grids never dropped to one column.
+- Closed signups keep their text readable — only the artwork fades. Buttons respond on press, and the "Free" label meets contrast.
+- Shortcode generator: the preview matches the live page, updates faster without blanking, and sits at full width; the tabs work with the keyboard.
+
 ### 1.2.0
 **Bricks Builder support**
 - Added three native Bricks elements — PCO Signup List, PCO Signup Card, and PCO Register Button — under a "Planning Center" category in the Bricks element panel, with full visual controls. Registered only when Bricks is active; Gutenberg blocks and shortcodes remain available everywhere.
