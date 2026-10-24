@@ -46,6 +46,7 @@
 @media (max-width: 1100px) { .ccpco-gen-layout { grid-template-columns: 1fr; } }
 
 .ccpco-gen-sidebar { position: sticky; top: 32px; }
+.ccpco-gen-preview-card { margin-top: 1.5rem; }
 
 .ccpco-gen-tabs {
   display: flex; flex-wrap: wrap; gap: .4rem;

@@ -367,14 +367,6 @@ class CCPCO_Admin {
                         <span id="ccpco-copy-msg" style="display:none;margin-left:.75rem;color:#16a34a;font-weight:600">&#10003; <?php esc_html_e('Copied!','comms-church-pco');?></span>
                     </div>
 
-                    <div class="ccpco-card" style="margin-top:1.25rem">
-                        <h2><?php esc_html_e('Live Preview','comms-church-pco');?></h2>
-                        <p style="font-size:.8rem;color:#64748b;margin-top:0"><?php esc_html_e('Renders the actual output using your live PCO data.','comms-church-pco');?></p>
-                        <div id="ccpco-gen-preview" class="ccpco-gen-preview">
-                            <p style="color:#94a3b8;font-style:italic"><?php esc_html_e('Adjust settings to see a preview.','comms-church-pco');?></p>
-                        </div>
-                    </div>
-
                     <div class="ccpco-card ccpco-tips" style="margin-top:1.25rem">
                         <h3><?php esc_html_e('How to use','comms-church-pco');?></h3>
                         <ul>
@@ -389,6 +381,16 @@ class CCPCO_Admin {
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Live preview: outside the grid so it gets page width (the Columns
+                 setting shows as it would on a page) and the sticky sidebar can't overlap it. -->
+            <div class="ccpco-card ccpco-gen-preview-card">
+                <h2><?php esc_html_e('Live Preview','comms-church-pco');?></h2>
+                <p style="font-size:.8rem;color:#64748b;margin-top:0"><?php esc_html_e('Renders the actual output using your live PCO data.','comms-church-pco');?></p>
+                <div id="ccpco-gen-preview" class="ccpco-gen-preview">
+                    <p style="color:#94a3b8;font-style:italic"><?php esc_html_e('Adjust settings to see a preview.','comms-church-pco');?></p>
+                </div>
             </div>
         </div>
         <?php
