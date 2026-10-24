@@ -36,7 +36,7 @@
 @media (max-width: 600px) {
   .ccpco-display-tiles,
   .ccpco-display-list .ccpco-card { grid-template-columns: 1fr; flex-direction: column; }
-  .ccpco-display-list .ccpco-card-image { flex: none; }
+  .ccpco-display-list .ccpco-card-image { flex: none; border-radius: var(--ccpco-radius) var(--ccpco-radius) 0 0; }
 }
 
 /* ---- Card ---------------------------------------------------------------- */
@@ -44,19 +44,24 @@
   background: var(--ccpco-card-bg);
   border-radius: var(--ccpco-radius);
   box-shadow: var(--ccpco-shadow);
-  overflow: hidden;
+  /* No overflow clipping here: the Add-to-Calendar menu has to escape the card.
+     The image rounds its own corners instead. */
   display: flex;
   flex-direction: column;
-  transition: transform .2s ease, box-shadow .2s ease;
+  transition: box-shadow .2s ease;
 }
-.ccpco-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0,0,0,.11);
-}
-.ccpco-closed { opacity: .72; }
+/* Shadow only — the card itself isn't a link, so it shouldn't lift like one. */
+.ccpco-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.11); }
+/* Closed: fade the artwork, keep the text readable. */
+.ccpco-closed .ccpco-card-image img,
+.ccpco-closed .ccpco-image-placeholder { opacity: .6; filter: grayscale(.4); }
 
 /* ---- Image --------------------------------------------------------------- */
-.ccpco-card-image { position: relative; overflow: hidden; background: #f1f5f9; }
+.ccpco-card-image {
+  position: relative; overflow: hidden; background: #f1f5f9;
+  border-radius: var(--ccpco-radius) var(--ccpco-radius) 0 0;
+}
+.ccpco-display-list .ccpco-card-image { border-radius: var(--ccpco-radius) 0 0 var(--ccpco-radius); }
 .ccpco-shape-cinematic { padding-top: 56.25%; }
 .ccpco-shape-square    { padding-top: 100%; }
 .ccpco-shape-portrait  { padding-top: 133%; }
@@ -106,7 +111,7 @@
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
 }
 .ccpco-price      { font-weight: 600; color: var(--ccpco-brand); }
-.ccpco-price-free { font-weight: 600; color: #16a34a; }
+.ccpco-price-free { font-weight: 600; color: #15803d; }
 
 .ccpco-card-actions {
   margin-top: auto; padding-top: .75rem;
@@ -139,8 +144,11 @@
 .ccpco-btn-primary {
   background-color: var(--ccpco-brand); color: #fff !important;
 }
-.ccpco-btn-primary:hover { filter: brightness(1.12); }
-.ccpco-btn-disabled { background: #e2e8f0; color: #94a3b8 !important; cursor: not-allowed; }
+.ccpco-btn-primary:hover { filter: brightness(.92); }
+.ccpco-btn:active,
+.ccpco-cal-trigger:active { transform: scale(.97); transition: transform 100ms ease-out; }
+.ccpco-btn-disabled { background: #f1f5f9; color: #475569 !important; border: 1px dashed #cbd5e1; cursor: not-allowed; }
+.ccpco-btn-disabled:active { transform: none; }
 
 /* ---- Add to Calendar ----------------------------------------------------- */
 .ccpco-cal-wrap { position: relative; display: inline-block; }
@@ -155,14 +163,22 @@
 .ccpco-cal-trigger svg { width: 13px; height: 13px; flex-shrink: 0; }
 .ccpco-cal-chevron { transition: transform .2s; }
 .ccpco-cal-wrap.open .ccpco-cal-chevron { transform: rotate(180deg); }
+/* Drops down from its trigger and grows out of it; visibility (not display)
+   so the open/close can transition. */
 .ccpco-cal-dropdown {
-  display: none; position: absolute; bottom: calc(100% + 6px); left: 0;
+  position: absolute; top: calc(100% + 6px); left: 0;
+  transform-origin: top left;
+  opacity: 0; transform: scale(.96); visibility: hidden;
+  transition: opacity .12s ease-out, transform .12s ease-out, visibility 0s linear .12s;
   background: #fff; border: 1px solid var(--ccpco-border);
   border-radius: calc(var(--ccpco-radius) / 1.5);
   box-shadow: 0 4px 18px rgba(0,0,0,.12);
   min-width: 210px; z-index: 9999; overflow: hidden;
 }
-.ccpco-cal-wrap.open .ccpco-cal-dropdown { display: block; }
+.ccpco-cal-wrap.open .ccpco-cal-dropdown {
+  opacity: 1; transform: none; visibility: visible;
+  transition: opacity .12s ease-out, transform .12s ease-out, visibility 0s;
+}
 .ccpco-cal-option {
   display: flex; align-items: center; gap: .6rem;
   padding: .6rem 1rem; color: var(--ccpco-text) !important;
@@ -222,10 +238,11 @@
 body.ccpco-font-small  { --ccpco-font-sm: .8125rem; --ccpco-font-xs: .75rem; }
 body.ccpco-font-large  { --ccpco-font-sm: 1rem;     --ccpco-font-xs: .875rem; }
 
-/* ---- Dropdown flip: open downward when near viewport top ------------------ */
-.ccpco-cal-wrap.ccpco-drop-down .ccpco-cal-dropdown {
-  bottom: auto;
-  top: calc(100% + 6px);
+/* ---- Dropdown flip: open upward only when there's no room below ----------- */
+.ccpco-cal-wrap.ccpco-drop-up .ccpco-cal-dropdown {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform-origin: bottom left;
 }
 
 /* ---- Reduced motion ------------------------------------------------------- */
@@ -233,8 +250,9 @@ body.ccpco-font-large  { --ccpco-font-sm: 1rem;     --ccpco-font-xs: .875rem; }
   .ccpco-card,
   .ccpco-progress-fill,
   .ccpco-cal-chevron,
+  .ccpco-cal-dropdown,
   .ccpco-btn { transition: none !important; }
-  .ccpco-card:hover { transform: none; }
+  .ccpco-cal-dropdown { transform: none; }
 }
 
 /* ---- Focus visibility ------------------------------------------------------ */
