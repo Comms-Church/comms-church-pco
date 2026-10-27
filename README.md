@@ -2,6 +2,10 @@
 
 Display Planning Center Registrations events on any WordPress site via Gutenberg blocks and shortcodes. API credentials are stored server-side and never exposed to visitors.
 
+## Pay what's fair
+
+This plugin is free so churches can spend less on their websites. If you use it in paid work — building or managing church websites for a fee — we ask that you [pay what you think is fair](https://buy.stripe.com/00w5kD8BF21R6SigP62B201). There are no license keys and no checks; it's the honor system. It keeps the plugins maintained and free for everyone else.
+
 ## Installation (first time on a new site)
 
 This plugin is not on WordPress.org, so the first install is manual:
