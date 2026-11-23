@@ -236,8 +236,8 @@ class CCPCO_Renderer {
                 </div>
 
                 <div class="ccpco-detail-actions">
-                    <?php if ( ! ( $a['closed'] ?? true ) && ! empty( $a['new_registration_url'] ) ) : ?>
-                    <a href="<?php echo esc_url( $a['new_registration_url'] ); ?>" class="ccpco-btn ccpco-btn-primary" target="_blank" rel="noopener noreferrer">
+                    <?php if ( ! ( $a['closed'] ?? true ) && self::registration_url( $a ) ) : ?>
+                    <a href="<?php echo esc_url( self::registration_url( $a ) ); ?>" class="ccpco-btn ccpco-btn-primary" target="_blank" rel="noopener noreferrer">
                         <?php echo esc_html( $args['button_label'] ); ?>
                     </a>
                     <?php endif; ?>
@@ -274,7 +274,7 @@ class CCPCO_Renderer {
 
         $a       = $data['data']['attributes'] ?? array();
         $closed  = $a['closed'] ?? true;
-        $reg_url = $a['new_registration_url'] ?? '';
+        $reg_url = self::registration_url( $a );
         $extra   = sanitize_html_class( $args['class'] );
 
         if ( $closed || ! $reg_url ) {
@@ -313,7 +313,7 @@ class CCPCO_Renderer {
         $desc     = $a['description'] ?? '';
         $logo     = $a['logo_url'] ?? '';
         $closed   = $a['closed']  ?? false;
-        $reg_url  = $a['new_registration_url'] ?? '';
+        $reg_url  = self::registration_url( $a );
 
         // Next time
         $next_time = null;
@@ -435,6 +435,19 @@ class CCPCO_Renderer {
     // =========================================================================
     // Helpers
     // =========================================================================
+
+    /**
+     * Where a Register link goes: the signup's Church Center event page.
+     * PCO's new_registration_url is the form behind it (/reservations/new), which
+     * sends a signed-out visitor to a login screen instead of the event.
+     */
+    public static function registration_url( $attrs ) {
+        return (string) preg_replace(
+            '#^(https://[^/]+/registrations/events/\d+)/reservations/new/?(?=$|[?\#])#',
+            '$1',
+            $attrs['new_registration_url'] ?? ''
+        );
+    }
 
     public function min_price_html( $signup_id ) {
         $data = CCPCO_Cache::remember( 'price_' . $signup_id, function() use ( $signup_id ) {

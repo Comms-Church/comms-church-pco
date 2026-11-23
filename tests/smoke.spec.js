@@ -26,6 +26,20 @@ test.describe('Public pages', () => {
     // Raw shortcode text in output means the shortcode failed to register.
     expect(body).not.toContain('[pco_');
   });
+
+  // ?pco_mock=1 switches on a fake Planning Center (mu-plugins/smoke-pco-mock.php)
+  // for this one request. PCO's new_registration_url is the Church Center form,
+  // which sends a signed-out visitor to a login page instead of the event.
+  test('Register links open the Church Center event page, not the login-gated form', async ({ page }) => {
+    await page.goto('/?pagename=register&pco_mock=1');
+    await expectClean(page);
+    const links = page.locator('a.ccpco-btn-primary');
+    // Card, detail view and standalone button.
+    await expect(links).toHaveCount(3);
+    for (const href of await links.evaluateAll((as) => as.map((a) => a.getAttribute('href')))) {
+      expect(href).toBe('https://smoke.churchcenter.com/registrations/events/777');
+    }
+  });
 });
 
 test.describe('Admin pages', () => {

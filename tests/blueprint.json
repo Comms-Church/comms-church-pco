@@ -2,8 +2,17 @@
   "$schema": "https://playground.wordpress.net/blueprint-schema.json",
   "steps": [
     {
+      "step": "writeFile",
+      "path": "/wordpress/wp-content/mu-plugins/smoke-pco-mock.php",
+      "data": "<?php\n// Smoke-test stand-in for Planning Center, only on requests carrying ?pco_mock=1\n// so the rest of the suite still checks the no-credentials notices.\nif ( empty( $_GET['pco_mock'] ) ) { return; }\n\nadd_filter( 'pre_option_ccpco_app_id', fn() => 'smoke' );\nadd_filter( 'pre_option_ccpco_secret', fn() => 'smoke' );\n\nadd_filter( 'pre_http_request', function ( $pre, $args, $url ) {\n\tif ( strpos( $url, 'https://api.planningcenteronline.com/registrations/v2/' ) !== 0 ) { return $pre; }\n\t$path   = (string) parse_url( $url, PHP_URL_PATH );\n\t$signup = [\n\t\t'type'       => 'Signup',\n\t\t'id'         => '777',\n\t\t'attributes' => [\n\t\t\t'name'                 => 'Church Workday',\n\t\t\t'description'          => 'Help spruce up the building.',\n\t\t\t'closed'               => false,\n\t\t\t'logo_url'             => null,\n\t\t\t// PCO's real field: the Church Center form, which sends a signed-out visitor to a login page.\n\t\t\t'new_registration_url' => 'https://smoke.churchcenter.com/registrations/events/777/reservations/new',\n\t\t],\n\t\t'relationships' => [],\n\t];\n\tif ( preg_match( '#/signups/777$#', $path ) ) {\n\t\t$body = [ 'data' => $signup, 'included' => [] ];\n\t} elseif ( preg_match( '#/signups$#', $path ) ) {\n\t\t$body = [ 'data' => [ $signup ], 'included' => [], 'meta' => [ 'total_count' => 1 ] ];\n\t} else {\n\t\t$body = [ 'data' => [], 'meta' => [ 'total_count' => 0 ] ];\n\t}\n\treturn [\n\t\t'headers'  => [],\n\t\t'body'     => wp_json_encode( $body ),\n\t\t'response' => [ 'code' => 200, 'message' => 'OK' ],\n\t\t'cookies'  => [],\n\t\t'filename' => null,\n\t];\n}, 10, 3 );\n"
+    },
+    {
       "step": "runPHP",
       "code": "<?php require_once '/wordpress/wp-load.php'; if ( get_page_by_path( 'events' ) ) { return; } wp_insert_post([ 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Events', 'post_name' => 'events', 'post_content' => '[pco_signups]' ]); flush_rewrite_rules();"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; if ( get_page_by_path( 'register' ) ) { return; } wp_insert_post([ 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Register', 'post_name' => 'register', 'post_content' => '[pco_signups][pco_signup id=\"777\"][pco_register_button id=\"777\"]' ]);"
     }
   ]
 }
